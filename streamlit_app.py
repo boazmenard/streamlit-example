@@ -16,30 +16,46 @@ I'll communicate updates to this tool as they come. **Let's work!** 🚀
 
 In the meantime, below is an example of what you can do with just a few lines of code:
 """
+import os, sys
 
+@st.experimental_singleton
+def installff():
+  os.system('sbase install geckodriver')
+  os.system('ln -s /home/appuser/venv/lib/python3.7/site-packages/seleniumbase/drivers/geckodriver /home/appuser/venv/bin/geckodriver')
+
+_ = installff()
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.service import Service
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver import FirefoxOptions
+opts = FirefoxOptions()
+opts.add_argument("--headless")
+browser = webdriver.Firefox(options=opts)
 
-URL = "http://www.python.org"
-TIMEOUT = 20
+browser.get('http://www.python.org')
+st.write(browser.title)
 
-st.title("Test Selenium")
+# from selenium import webdriver
+# from selenium.common.exceptions import TimeoutException
+# from selenium.webdriver.common.by import By
+# from selenium.webdriver.firefox.options import Options
+# from selenium.webdriver.firefox.service import Service
+# from selenium.webdriver.support import expected_conditions as EC
+# from selenium.webdriver.support.ui import WebDriverWait
+# from webdriver_manager.firefox import GeckoDriverManager
 
-firefoxOptions = Options()
-firefoxOptions.add_argument("--headless")
-service = Service(GeckoDriverManager().install())
-driver = webdriver.Firefox(
-    options=firefoxOptions,
-    service=service,
-)
-driver.get(URL)
-st.write(driver.title)
+# URL = "http://www.python.org"
+# TIMEOUT = 20
+
+# st.title("Test Selenium")
+
+# firefoxOptions = Options()
+# firefoxOptions.add_argument("--headless")
+# service = Service(GeckoDriverManager().install())
+# driver = webdriver.Firefox(
+#     options=firefoxOptions,
+#     service=service,
+# )
+# driver.get(URL)
+# st.write(driver.title)
 
 
 
