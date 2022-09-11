@@ -30,7 +30,7 @@ from selenium import webdriver
 from selenium.webdriver import FirefoxOptions
 opts = FirefoxOptions()
 opts.add_argument("--headless")
-service = Service(GeckoDriverManager.install())
+service = Service(GeckoDriverManager().install())
 browser = webdriver.Firefox(options=opts, service=service)
 
 browser.get('http://www.python.org')
