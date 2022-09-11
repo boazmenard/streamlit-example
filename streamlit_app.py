@@ -40,66 +40,65 @@ service = Service(GeckoDriverManager().install())
 browser = webdriver.Firefox(options=opts)
 job_finished = False
 parcel_number = st.text_input('Input Parcel Number', '')
+st.write("RUNNING WITH THIS NUMBER: " + parcel_number)
 
-st.write(parcel_number)
 
+try:
+    website_search_url = 'http://www3.nccde.org/parcel/search/'
+    browser.implicitly_wait(3)
+    browser.get(website_search_url)
+    todays_date = date.today()
+    parcel_search_box = browser.find_element_by_xpath('//*[@id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1__TextBoxParcelNumber"]')
+    parcel_search_box.send_keys(parcel_number)
+    search_button = browser.find_element_by_xpath('//*[@id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1__ButtonSearch"]')
+    search_button.click()
+    details = browser.find_element_by_xpath('//*[@id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1__GridViewResults_ctl02__LinkButtonDetails"]')
+    details.click()
+    time.sleep(5)
+    detail_url = browser.current_url
 
-# try:
-#     website_search_url = 'http://www3.nccde.org/parcel/search/'
-#     browser.implicitly_wait(3)
-#     browser.get(website_search_url)
-#     todays_date = date.today()
-#     parcel_search_box = browser.find_element_by_xpath('//*[@id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1__TextBoxParcelNumber"]')
-#     parcel_search_box.send_keys(parcel_number)
-#     search_button = browser.find_element_by_xpath('//*[@id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1__ButtonSearch"]')
-#     search_button.click()
-#     details = browser.find_element_by_xpath('//*[@id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1__GridViewResults_ctl02__LinkButtonDetails"]')
-#     details.click()
-#     time.sleep(5)
-#     detail_url = browser.current_url
+    browser.quit()
 
-#     browser.quit()
+    #parsing HTML
+    page = requests.get(detail_url)
+    page_html = BeautifulSoup(page.text, 'html.parser')
+    residence_characteristics = page_html.find("div", class_="residence level4")
+    table = residence_characteristics.find("table", class_="form")
+    all_rows = table.find_all('tr')
 
-#     #parsing HTML
-#     page = requests.get(detail_url)
-#     page_html = BeautifulSoup(page.text, 'html.parser')
-#     residence_characteristics = page_html.find("div", class_="residence level4")
-#     table = residence_characteristics.find("table", class_="form")
-#     all_rows = table.find_all('tr')
+    ## Creating the df
+    parcel_dictionary = {'Parcel #': parcel_number}
+    house_data = []
+    for row in all_rows:
+        columns = row.find_all('td')
+        columns = [elem.text.strip() for elem in columns]
+        house_data.append([elem for elem in columns])
 
-#     ## Creating the df
-#     parcel_dictionary = {'Parcel #': parcel_number}
-#     house_data = []
-#     for row in all_rows:
-#         columns = row.find_all('td')
-#         columns = [elem.text.strip() for elem in columns]
-#         house_data.append([elem for elem in columns])
+    features = []
+    data = []
+    for sublist in house_data:
+        for i in range(len(sublist)):
+            if i % 2 == 0:
+                elem = sublist[i].replace(':', '')
+                features.append(elem)
+            else:
+                data.append(sublist[i])
 
-#     features = []
-#     data = []
-#     for sublist in house_data:
-#         for i in range(len(sublist)):
-#             if i % 2 == 0:
-#                 elem = sublist[i].replace(':', '')
-#                 features.append(elem)
-#             else:
-#                 data.append(sublist[i])
+    for i in range(len(features)):
+        parcel_dictionary[features[i]] = data[i]
 
-#     for i in range(len(features)):
-#         parcel_dictionary[features[i]] = data[i]
+    del parcel_dictionary['']
+    parcel_data_df = pd.DataFrame([parcel_dictionary])
 
-#     del parcel_dictionary['']
-#     parcel_data_df = pd.DataFrame([parcel_dictionary])
+    # export to excel
+    parcel_data_df.to_excel(f'./{todays_date}-parcel_sheet_export.xlsx', index = False)
+    job_finished = True
+except:
+    st.write("The automation couldn't find the information. Please DOUBLE CHECK the parcel number and try again.")
+    st.write("If you've already double checked and can find information for the property manually, my apologies! Please note the number down and get back to me.")
 
-#     # export to excel
-#     parcel_data_df.to_excel(f'./{todays_date}-parcel_sheet_export.xlsx', index = False)
-#     job_finished = True
-# except:
-#     st.write("The automation couldn't find the information. Please DOUBLE CHECK the parcel number and try again.")
-#     st.write("If you've already double checked and can find information for the property manually, my apologies! Please note the number down and get back to me.")
-
-# if job_finished:
-#     st.write('Your excel sheet is done! Thanks!')
+if job_finished:
+    st.write('Your excel sheet is done! Thanks!')
 
 
 
