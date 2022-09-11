@@ -38,7 +38,7 @@ opts = Options()
 opts.add_argument("--headless")
 service = Service(GeckoDriverManager().install())
 browser = webdriver.Firefox(options=opts)
-#job_finished = False
+#job_finished = Falseb
 parcel_number = st.text_input('Input Parcel Number', '')
 st.write("RUNNING WITH THIS NUMBER: " + parcel_number)
 
