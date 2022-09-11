@@ -8,9 +8,9 @@ import streamlit as st
 # Welcome to the NCC Parcel Search!
 
 Welcome Forward Real Estate Team! 👋 
-This is the automation tool for parcel search of New Castle County ***ONLY***. 
+ This is the automation tool for parcel search of New Castle County ***ONLY***. 
 Right now you can only search one parcel at at time 😭. 
-But i'm working on getting you able to search multiple at a time. 
+But I'm working on getting you able to search multiple at a time. 
 So far I focused on getting you this tool available so that you can start using it right away from your own computers. 
 I'll communicate updates to this tool as they come. **Let's work!** 🚀
 
