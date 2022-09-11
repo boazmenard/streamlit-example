@@ -38,7 +38,7 @@ opts = Options()
 opts.add_argument("--headless")
 service = Service(GeckoDriverManager().install())
 browser = webdriver.Firefox(options=opts)
-job_finished = False
+#job_finished = False
 parcel_number = st.text_input('Input Parcel Number', '')
 st.write("RUNNING WITH THIS NUMBER: " + parcel_number)
 
@@ -91,16 +91,23 @@ try:
     parcel_data_df = pd.DataFrame([parcel_dictionary])
 
     # export to excel
-    #parcel_data_df.to_excel(f'./{todays_date}-parcel_sheet_export.xlsx', index = False)
-    st.write(parcel_data_df)
+    excel = parcel_data_df.to_excel(f'./{todays_date}-parcel_sheet_export.xlsx', index = False).encode('utf-8')
+    st.write('Your excel sheet is done! Thanks! Please download below.')
+    fileName = f'{todays_date}-parcel_sheet_export.xlsx'
+    st.download_button(
+     label="Download Here",
+     data=excel,
+     file_name=fileName,
+     mime='text/xlsx'
+    )
     job_finished = True
 except Exception as e:
-    st.write(e)
     st.write("The automation couldn't find the information. Please DOUBLE CHECK the parcel number and try again.")
     st.write("If you've already double checked and can find information for the property manually, my apologies! Please note the number down and get back to me.")
 
-if job_finished:
-    st.write('Your excel sheet is done! Thanks!')
+# if job_finished:
+#     st.write('Your excel sheet is done! Thanks! Please download below.')
+
 
 
 
