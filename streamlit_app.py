@@ -33,103 +33,79 @@ def installff():
   os.system('sbase install geckodriver')
   os.system('ln -sf /home/appuser/venv/bin/geckodriver /home/appuser/venv/lib/python3.7/site-packages/seleniumbase/drivers/geckodriver')
 
+@st.cache
+def convert_df(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+    return df.to_csv().encode('utf-8')
+
 _ = installff()
 opts = Options()
 opts.add_argument("--headless")
 service = Service(GeckoDriverManager().install())
 browser = webdriver.Firefox(options=opts)
-#job_finished = Falseb
 parcel_number = st.text_input('Input Parcel Number', '')
-st.write("RUNNING WITH THIS NUMBER: " + parcel_number)
 
+if st.button("RUN AUTOMATION"):
+    st.write("RUNNING WITH THIS NUMBER: " + parcel_number)
+    try:
+        website_search_url = 'http://www3.nccde.org/parcel/search/'
+        browser.implicitly_wait(3)
+        browser.get(website_search_url)
+        todays_date = date.today()
+        parcel_search_box = browser.find_element('xpath' ,'//*[@id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1__TextBoxParcelNumber"]')
+        parcel_search_box.send_keys(parcel_number)
+        search_button = browser.find_element('xpath' ,'//*[@id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1__ButtonSearch"]')
+        search_button.click()
+        details = browser.find_element('xpath' ,'//*[@id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1__GridViewResults_ctl02__LinkButtonDetails"]')
+        details.click()
+        time.sleep(5)
+        detail_url = browser.current_url
 
-try:
-    website_search_url = 'http://www3.nccde.org/parcel/search/'
-    browser.implicitly_wait(3)
-    browser.get(website_search_url)
-    todays_date = date.today()
-    parcel_search_box = browser.find_element('xpath' ,'//*[@id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1__TextBoxParcelNumber"]')
-    parcel_search_box.send_keys(parcel_number)
-    search_button = browser.find_element('xpath' ,'//*[@id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1__ButtonSearch"]')
-    search_button.click()
-    details = browser.find_element('xpath' ,'//*[@id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1__GridViewResults_ctl02__LinkButtonDetails"]')
-    details.click()
-    time.sleep(5)
-    detail_url = browser.current_url
+        browser.quit()
 
-    browser.quit()
+        #parsing HTML
+        page = requests.get(detail_url)
+        page_html = BeautifulSoup(page.text, 'html.parser')
+        residence_characteristics = page_html.find("div", class_="residence level4")
+        table = residence_characteristics.find("table", class_="form")
+        all_rows = table.find_all('tr')
 
-    #parsing HTML
-    page = requests.get(detail_url)
-    page_html = BeautifulSoup(page.text, 'html.parser')
-    residence_characteristics = page_html.find("div", class_="residence level4")
-    table = residence_characteristics.find("table", class_="form")
-    all_rows = table.find_all('tr')
+        ## Creating the df
+        parcel_dictionary = {'Parcel #': parcel_number}
+        house_data = []
+        for row in all_rows:
+            columns = row.find_all('td')
+            columns = [elem.text.strip() for elem in columns]
+            house_data.append([elem for elem in columns])
 
-    ## Creating the df
-    parcel_dictionary = {'Parcel #': parcel_number}
-    house_data = []
-    for row in all_rows:
-        columns = row.find_all('td')
-        columns = [elem.text.strip() for elem in columns]
-        house_data.append([elem for elem in columns])
+        features = []
+        data = []
+        for sublist in house_data:
+            for i in range(len(sublist)):
+                if i % 2 == 0:
+                    elem = sublist[i].replace(':', '')
+                    features.append(elem)
+                else:
+                    data.append(sublist[i])
 
-    features = []
-    data = []
-    for sublist in house_data:
-        for i in range(len(sublist)):
-            if i % 2 == 0:
-                elem = sublist[i].replace(':', '')
-                features.append(elem)
-            else:
-                data.append(sublist[i])
+        for i in range(len(features)):
+            parcel_dictionary[features[i]] = data[i]
 
-    for i in range(len(features)):
-        parcel_dictionary[features[i]] = data[i]
+        del parcel_dictionary['']
+        parcel_data_df = pd.DataFrame([parcel_dictionary])
 
-    del parcel_dictionary['']
-    parcel_data_df = pd.DataFrame([parcel_dictionary])
+        # export to excel
+        csv = convert_df(parcel_data_df)
+        st.write('Your excel sheet is done! Thanks! Please download below.')
+        fileName = f'{todays_date}-parcel_sheet_export.csv'
+        st.download_button(
+        label="Download Here (CSV, resave as .xlsx if needed)",
+        data=csv,
+        file_name=fileName,
+        mime='text/csv'
+        )
+        job_finished = True
+    except Exception as e:
+        st.write("The automation couldn't find the information. Please DOUBLE CHECK the parcel number and try again.")
+        st.write("If you've already double checked and can find information for the property manually, my apologies! Please note the number down and get back to me.")
 
-    # export to excel
-    excel = parcel_data_df.to_excel(f'./{todays_date}-parcel_sheet_export.xlsx', index = False).encode('utf-8')
-    st.write('Your excel sheet is done! Thanks! Please download below.')
-    fileName = f'{todays_date}-parcel_sheet_export.xlsx'
-    st.download_button(
-     label="Download Here",
-     data=excel,
-     file_name=fileName,
-     mime='text/xlsx'
-    )
-    job_finished = True
-except Exception as e:
-    st.write(e)
-    st.write("The automation couldn't find the information. Please DOUBLE CHECK the parcel number and try again.")
-    st.write("If you've already double checked and can find information for the property manually, my apologies! Please note the number down and get back to me.")
-
-# if job_finished:
-#     st.write('Your excel sheet is done! Thanks! Please download below.')
-
-
-
-
-
-# with st.echo(code_location='below'):
-#     total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-#     num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
-
-#     Point = namedtuple('Point', 'x y')
-#     data = []
-
-#     points_per_turn = total_points / num_turns
-
-#     for curr_point_num in range(total_points):
-#         curr_turn, i = divmod(curr_point_num, points_per_turn)
-#         angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-#         radius = curr_point_num / total_points
-#         x = radius * math.cos(angle)
-#         y = radius * math.sin(angle)
-#         data.append(Point(x, y))
-
-#     st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-#         .mark_circle(color='#0068c9', opacity=0.5)
-#         .encode(x='x:Q', y='y:Q'))
