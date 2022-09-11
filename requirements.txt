@@ -4,3 +4,6 @@ streamlit
 selenium
 webdriver-manager
 seleniumbase
+datetime
+requests
+bs4

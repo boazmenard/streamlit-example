@@ -5,6 +5,14 @@ import pandas as pd
 import streamlit as st
 from selenium.webdriver.firefox.service import Service
 from webdriver_manager.firefox import GeckoDriverManager
+import time
+import requests
+from datetime import date
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 
 """
 # Welcome to the NCC Parcel Search!
@@ -26,40 +34,72 @@ def installff():
   os.system('ln -sf /home/appuser/venv/bin/geckodriver /home/appuser/venv/lib/python3.7/site-packages/seleniumbase/drivers/geckodriver')
 
 _ = installff()
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
 opts = Options()
-#opts.binary_location = '/home/appuser/venv/bin/geckodriver.exe'
 opts.add_argument("--headless")
 service = Service(GeckoDriverManager().install())
 browser = webdriver.Firefox(options=opts)
+job_finished = False
+parcel_number = st.text_input('Input Parcel Number', '')
 
-browser.get('http://www.python.org')
-st.write(browser.title)
+st.write(parcel_number)
 
-# from selenium import webdriver
-# from selenium.common.exceptions import TimeoutException
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.firefox.options import Options
-# from selenium.webdriver.firefox.service import Service
-# from selenium.webdriver.support import expected_conditions as EC
-# from selenium.webdriver.support.ui import WebDriverWait
-# from webdriver_manager.firefox import GeckoDriverManager
 
-# URL = "http://www.python.org"
-# TIMEOUT = 20
+# try:
+#     website_search_url = 'http://www3.nccde.org/parcel/search/'
+#     browser.implicitly_wait(3)
+#     browser.get(website_search_url)
+#     todays_date = date.today()
+#     parcel_search_box = browser.find_element_by_xpath('//*[@id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1__TextBoxParcelNumber"]')
+#     parcel_search_box.send_keys(parcel_number)
+#     search_button = browser.find_element_by_xpath('//*[@id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1__ButtonSearch"]')
+#     search_button.click()
+#     details = browser.find_element_by_xpath('//*[@id="ctl00_ctl00_ContentPlaceHolder1_ContentPlaceHolder1__GridViewResults_ctl02__LinkButtonDetails"]')
+#     details.click()
+#     time.sleep(5)
+#     detail_url = browser.current_url
 
-# st.title("Test Selenium")
+#     browser.quit()
 
-# firefoxOptions = Options()
-# firefoxOptions.add_argument("--headless")
-# service = Service(GeckoDriverManager().install())
-# driver = webdriver.Firefox(
-#     options=firefoxOptions,
-#     service=service,
-# )
-# driver.get(URL)
-# st.write(driver.title)
+#     #parsing HTML
+#     page = requests.get(detail_url)
+#     page_html = BeautifulSoup(page.text, 'html.parser')
+#     residence_characteristics = page_html.find("div", class_="residence level4")
+#     table = residence_characteristics.find("table", class_="form")
+#     all_rows = table.find_all('tr')
+
+#     ## Creating the df
+#     parcel_dictionary = {'Parcel #': parcel_number}
+#     house_data = []
+#     for row in all_rows:
+#         columns = row.find_all('td')
+#         columns = [elem.text.strip() for elem in columns]
+#         house_data.append([elem for elem in columns])
+
+#     features = []
+#     data = []
+#     for sublist in house_data:
+#         for i in range(len(sublist)):
+#             if i % 2 == 0:
+#                 elem = sublist[i].replace(':', '')
+#                 features.append(elem)
+#             else:
+#                 data.append(sublist[i])
+
+#     for i in range(len(features)):
+#         parcel_dictionary[features[i]] = data[i]
+
+#     del parcel_dictionary['']
+#     parcel_data_df = pd.DataFrame([parcel_dictionary])
+
+#     # export to excel
+#     parcel_data_df.to_excel(f'./{todays_date}-parcel_sheet_export.xlsx', index = False)
+#     job_finished = True
+# except:
+#     st.write("The automation couldn't find the information. Please DOUBLE CHECK the parcel number and try again.")
+#     st.write("If you've already double checked and can find information for the property manually, my apologies! Please note the number down and get back to me.")
+
+# if job_finished:
+#     st.write('Your excel sheet is done! Thanks!')
 
 
 
