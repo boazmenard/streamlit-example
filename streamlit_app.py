@@ -102,6 +102,7 @@ try:
     )
     job_finished = True
 except Exception as e:
+    st.write(e)
     st.write("The automation couldn't find the information. Please DOUBLE CHECK the parcel number and try again.")
     st.write("If you've already double checked and can find information for the property manually, my apologies! Please note the number down and get back to me.")
 
