@@ -29,10 +29,10 @@ _ = installff()
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 opts = Options()
-opts.binary_location = '/home/appuser/venv/bin/geckodriver.exe'
+#opts.binary_location = '/home/appuser/venv/bin/geckodriver.exe'
 opts.add_argument("--headless")
 service = Service(GeckoDriverManager().install())
-browser = webdriver.Firefox(options=opts, service=service)
+browser = webdriver.Firefox(options=opts)
 
 browser.get('http://www.python.org')
 st.write(browser.title)
