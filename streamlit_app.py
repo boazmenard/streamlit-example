@@ -28,7 +28,7 @@ from selenium import webdriver
 from selenium.webdriver import FirefoxOptions
 opts = FirefoxOptions()
 opts.add_argument("--headless")
-browser = webdriver.Firefox(options=opts)
+browser = webdriver.Firefox(options=opts, firefox_binary='/home/appuser/venv/bin/geckodriver')
 
 browser.get('http://www.python.org')
 st.write(browser.title)
