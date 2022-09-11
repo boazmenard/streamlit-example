@@ -91,7 +91,8 @@ try:
     parcel_data_df = pd.DataFrame([parcel_dictionary])
 
     # export to excel
-    parcel_data_df.to_excel(f'./{todays_date}-parcel_sheet_export.xlsx', index = False)
+    #parcel_data_df.to_excel(f'./{todays_date}-parcel_sheet_export.xlsx', index = False)
+    st.write(parcel_data_df)
     job_finished = True
 except:
     st.write("The automation couldn't find the information. Please DOUBLE CHECK the parcel number and try again.")
