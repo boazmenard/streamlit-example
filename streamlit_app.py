@@ -3,6 +3,8 @@ import altair as alt
 import math
 import pandas as pd
 import streamlit as st
+from selenium.webdriver.firefox.service import Service
+from webdriver_manager.firefox import GeckoDriverManager
 
 """
 # Welcome to the NCC Parcel Search!
@@ -28,7 +30,8 @@ from selenium import webdriver
 from selenium.webdriver import FirefoxOptions
 opts = FirefoxOptions()
 opts.add_argument("--headless")
-browser = webdriver.Firefox(options=opts, firefox_binary='/home/appuser/venv/bin/geckodriver')
+service = Service(GeckoDriverManager.install())
+browser = webdriver.Firefox(options=opts, service=service)
 
 browser.get('http://www.python.org')
 st.write(browser.title)
