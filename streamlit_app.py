@@ -17,24 +17,50 @@ I'll communicate updates to this tool as they come. **Let's work!** 🚀
 In the meantime, below is an example of what you can do with just a few lines of code:
 """
 
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.firefox import GeckoDriverManager
 
-with st.echo(code_location='below'):
-    total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-    num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
+URL = "http://www.python.org"
+TIMEOUT = 20
 
-    Point = namedtuple('Point', 'x y')
-    data = []
+st.title("Test Selenium")
 
-    points_per_turn = total_points / num_turns
+firefoxOptions = Options()
+firefoxOptions.add_argument("--headless")
+service = Service(GeckoDriverManager().install())
+driver = webdriver.Firefox(
+    options=firefoxOptions,
+    service=service,
+)
+driver.get(URL)
+st.write(driver.title)
 
-    for curr_point_num in range(total_points):
-        curr_turn, i = divmod(curr_point_num, points_per_turn)
-        angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-        radius = curr_point_num / total_points
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        data.append(Point(x, y))
 
-    st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-        .mark_circle(color='#0068c9', opacity=0.5)
-        .encode(x='x:Q', y='y:Q'))
+
+
+# with st.echo(code_location='below'):
+#     total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
+#     num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
+
+#     Point = namedtuple('Point', 'x y')
+#     data = []
+
+#     points_per_turn = total_points / num_turns
+
+#     for curr_point_num in range(total_points):
+#         curr_turn, i = divmod(curr_point_num, points_per_turn)
+#         angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
+#         radius = curr_point_num / total_points
+#         x = radius * math.cos(angle)
+#         y = radius * math.sin(angle)
+#         data.append(Point(x, y))
+
+#     st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
+#         .mark_circle(color='#0068c9', opacity=0.5)
+#         .encode(x='x:Q', y='y:Q'))
