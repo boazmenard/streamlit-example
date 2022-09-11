@@ -27,8 +27,8 @@ def installff():
 
 _ = installff()
 from selenium import webdriver
-from selenium.webdriver import FirefoxOptions
-opts = FirefoxOptions()
+from selenium.webdriver.firefox.options import Options
+opts = Options()
 opts.add_argument("--headless")
 service = Service(GeckoDriverManager().install())
 browser = webdriver.Firefox(options=opts, service=service)
